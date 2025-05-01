@@ -1,0 +1,20 @@
+tables = spark.catalog.listTables("catalog_dev.bronze_db")
+
+delta_tables = []
+
+for table in tables:
+    full_table_name = f"{table.catalog}.{table.database}.{table.name}"
+    details = spark.sql(f"DESCRIBE DETAIL {full_table_name}").collect()
+    if details[0]["format"] == "delta":
+        delta_tables.append(full_table_name)
+
+# Display Delta tables
+for t in delta_tables:
+    print(t)
+
+
+
+from delta.tables import DeltaTable
+
+if DeltaTable.isDeltaTable(spark, "path/to/your/table"):
+    print("It's a Delta table")
