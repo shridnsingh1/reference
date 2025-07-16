@@ -1,0 +1,511 @@
+Experience in developing code-based ETL/ELT data pipelines with
+performance-optimised data modelling, preferably in the banking
+or financial services industry
+. Strong hands-on coding ability in Python
+· Solid experience in authoring complex SQL queries and Data
+Definition Language (DDL)
+· Proven expertise in data warehousing concepts and data modelling
+techniques
+· Proficiency in data formatting, wrangling and data preparation
+· Experience with analytics, denormalization of data, extensive views,
+and analytics and reporting
+
+
+SQL analytic (window) function:
+
+EMPNO| ENAME|      JOB| MGR| HIREDATE| SAL|COMM|DEPTNO|
++-----+------+---------+----+---------+----+----+------+
+| 7369| SMITH|    CLERK|7902|17-DEC-80| 800|NULL|    20|
+| 7499| ALLEN| SALESMAN|7698|20-FEB-81|1600| 300|    30|
+| 7521|  WARD| SALESMAN|7698|22-FEB-81|1250| 500|    30|
+| 7566| JONES|  MANAGER|7839|02-APR-81|2975|NULL|    20|
+| 7654|MARTIN| SALESMAN|7698|28-SEP-81|1250|1400|    30|
+| 7698| BLAKE|  MANAGER|7839|01-MAY-81|2850|NULL|    30|
+| 7782| CLARK|  MANAGER|7839|09-JUN-81|2450|NULL|    10|
+| 7788| SCOTT|  ANALYST|7566|19-APR-87|3000|NULL|    20|
+| 7839|  KING|PRESIDENT|NULL|17-NOV-81|5000|NULL|    10|
+| 7844|TURNER| SALESMAN|7698|08-SEP-81|1500|   0|    30|
+| 7876| ADAMS|    CLERK|7788|23-MAY-87|1100|NULL|    20|
+| 7900| JAMES|    CLERK|7698|03-DEC-81| 950|NULL|    30|
+| 7902|  FORD|  ANALYST|7566|03-DEC-81|3000|NULL|    20|
+| 7934|MILLER|    CLERK|7782|23-JAN-82|1300|NULL|    10|
++-----+------+---------+----+---------+----+----+------+
+
+
+
+  OVER() clause – defines a "window" (subset of rows) for the function to operate on.
+🔹 PARTITION BY – splits the data into groups (like a GROUP BY, but windowed). it optional according to the requirement we can create batch like dept,Sex.
+🔹 ORDER BY – orders rows within each partition.
+🔹 ROWS BETWEEN ... – further refines the window by specifying range of rows relative to the current row.
+
+1)UNBOUNDED PRECEDING to UNBOUNDED FOLLOWING
+   ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+Meaning:
+UNBOUNDED PRECEDING = the first row in the partition.
+UNBOUNDED FOLLOWING = the last row in the partition.
+
+select EMPNO , ENAME, JOB, MGR, HIREDATE, SAL,COMM,DEPTNO, \
+         sum(SAL) over(partition by DEPTNO order by SAL rows between unbounded preceding and unbounded following) as Cumul_Sal \
+          from emp_tbl
+
+PARTITION BY DEPTNO: Groups the employees by department (DEPTNO).
+ORDER BY SAL:Sorts employees within each department by salary in ascending order.
+
+ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+Means the window frame includes all rows in that partition, regardless of the current row.
+
+SUM(SAL)
+Computes the total salary for each department, repeated across each row in that department.
+
+
+EMPNO| ENAME|      JOB| MGR| HIREDATE| SAL|COMM|DEPTNO|Cumul_Sal|
++-----+------+---------+----+---------+----+----+------+---------+
+| 7934|MILLER|    CLERK|7782|23-JAN-82|1300|NULL|    10|     8750|
+| 7782| CLARK|  MANAGER|7839|09-JUN-81|2450|NULL|    10|     8750|
+| 7839|  KING|PRESIDENT|NULL|17-NOV-81|5000|NULL|    10|     8750|
+| 7369| SMITH|    CLERK|7902|17-DEC-80| 800|NULL|    20|    10875|
+| 7876| ADAMS|    CLERK|7788|23-MAY-87|1100|NULL|    20|    10875|
+| 7566| JONES|  MANAGER|7839|02-APR-81|2975|NULL|    20|    10875|
+| 7788| SCOTT|  ANALYST|7566|19-APR-87|3000|NULL|    20|    10875|
+| 7902|  FORD|  ANALYST|7566|03-DEC-81|3000|NULL|    20|    10875|
+| 7900| JAMES|    CLERK|7698|03-DEC-81| 950|NULL|    30|     9400|
+| 7521|  WARD| SALESMAN|7698|22-FEB-81|1250| 500|    30|     9400|
+| 7654|MARTIN| SALESMAN|7698|28-SEP-81|1250|1400|    30|     9400|
+| 7844|TURNER| SALESMAN|7698|08-SEP-81|1500|   0|    30|     9400|
+| 7499| ALLEN| SALESMAN|7698|20-FEB-81|1600| 300|    30|     9400|
+| 7698| BLAKE|  MANAGER|7839|01-MAY-81|2850|NULL|    30|     9400
+
+
+2)Use ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW when you want a cumulative sum up to the current row (i.e., a running total), instead of a fixed total across the entire partition.
+if we don't define any clause ,by default clause apply:#rows between unbounded preceding and current row
+
+select EMPNO , ENAME, JOB, MGR, HIREDATE, COMM,DEPTNO,SAL, 
+sum(SAL) over(partition by DEPTNO order by SAL ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW ) as Cumul_Sal from emp_tbl;
+OR 
+select EMPNO , ENAME, JOB, MGR, HIREDATE, COMM,DEPTNO,SAL,sum(SAL) over(partition by DEPTNO order by SAL) as Cumul_Sal from emp_tbl;
+
+
+EMPNO| ENAME|      JOB| MGR| HIREDATE|COMM|DEPTNO| SAL|Cumul_Sal|
++-----+------+---------+----+---------+----+------+----+---------+
+| 7934|MILLER|    CLERK|7782|23-JAN-82|NULL|    10|1300|     1300|
+| 7782| CLARK|  MANAGER|7839|09-JUN-81|NULL|    10|2450|     3750|
+| 7839|  KING|PRESIDENT|NULL|17-NOV-81|NULL|    10|5000|     8750|
+| 7369| SMITH|    CLERK|7902|17-DEC-80|NULL|    20| 800|      800|
+| 7876| ADAMS|    CLERK|7788|23-MAY-87|NULL|    20|1100|     1900|
+| 7566| JONES|  MANAGER|7839|02-APR-81|NULL|    20|2975|     4875|
+| 7788| SCOTT|  ANALYST|7566|19-APR-87|NULL|    20|3000|    10875|
+| 7902|  FORD|  ANALYST|7566|03-DEC-81|NULL|    20|3000|    10875|
+| 7900| JAMES|    CLERK|7698|03-DEC-81|NULL|    30| 950|      950|
+| 7521|  WARD| SALESMAN|7698|22-FEB-81| 500|    30|1250|     3450|
+| 7654|MARTIN| SALESMAN|7698|28-SEP-81|1400|    30|1250|     3450|
+| 7844|TURNER| SALESMAN|7698|08-SEP-81|   0|    30|1500|     4950|
+| 7499| ALLEN| SALESMAN|7698|20-FEB-81| 300|    30|1600|     6550|
+| 7698| BLAKE|  MANAGER|7839|01-MAY-81|NULL|    30|2850|     9400|
+
+
+3)without partition by ,its optional according to the requirement we can create batch like dept,Sex.
+select EMPNO , ENAME, JOB, MGR, HIREDATE, COMM,DEPTNO,SAL, sum(SAL) 
+over(order by SAL ) as Cumul_Sal from emp_tbl order by SAL:
+
+EMPNO| ENAME|      JOB| MGR| HIREDATE|COMM|DEPTNO| SAL|Cumul_Sal|
++-----+------+---------+----+---------+----+------+----+---------+
+| 7369| SMITH|    CLERK|7902|17-DEC-80|NULL|    20| 800|      800|
+| 7900| JAMES|    CLERK|7698|03-DEC-81|NULL|    30| 950|     1750|
+| 7876| ADAMS|    CLERK|7788|23-MAY-87|NULL|    20|1100|     2850|
+| 7521|  WARD| SALESMAN|7698|22-FEB-81| 500|    30|1250|     5350|
+| 7654|MARTIN| SALESMAN|7698|28-SEP-81|1400|    30|1250|     5350|
+| 7934|MILLER|    CLERK|7782|23-JAN-82|NULL|    10|1300|     6650|
+| 7844|TURNER| SALESMAN|7698|08-SEP-81|   0|    30|1500|     8150|
+| 7499| ALLEN| SALESMAN|7698|20-FEB-81| 300|    30|1600|     9750|
+| 7782| CLARK|  MANAGER|7839|09-JUN-81|NULL|    10|2450|    12200|
+| 7698| BLAKE|  MANAGER|7839|01-MAY-81|NULL|    30|2850|    15050|
+| 7566| JONES|  MANAGER|7839|02-APR-81|NULL|    20|2975|    18025|
+| 7788| SCOTT|  ANALYST|7566|19-APR-87|NULL|    20|3000|    24025|
+| 7902|  FORD|  ANALYST|7566|03-DEC-81|NULL|    20|3000|    24025|
+| 7839|  KING|PRESIDENT|NULL|17-NOV-81|NULL|    10|5000|    29025|
++-----+------+---------+----+---------+----+------+----+---------+
+
+3.b)without partition by ,its optional according to the requirement we can create batch like dept,Sex.
+ select EMPNO , ENAME, JOB, MGR, HIREDATE, COMM,DEPTNO,SAL, sum(SAL) 
+over(order by DEPTNO ) as Cumul_Sal from emp_tbl;
+
+EMPNO| ENAME|      JOB| MGR| HIREDATE|COMM|DEPTNO| SAL|Cumul_Sal|
++-----+------+---------+----+---------+----+------+----+---------+
+| 7782| CLARK|  MANAGER|7839|09-JUN-81|NULL|    10|2450|     8750|
+| 7839|  KING|PRESIDENT|NULL|17-NOV-81|NULL|    10|5000|     8750|
+| 7934|MILLER|    CLERK|7782|23-JAN-82|NULL|    10|1300|     8750|
+| 7369| SMITH|    CLERK|7902|17-DEC-80|NULL|    20| 800|    19625|
+| 7566| JONES|  MANAGER|7839|02-APR-81|NULL|    20|2975|    19625|
+| 7788| SCOTT|  ANALYST|7566|19-APR-87|NULL|    20|3000|    19625|
+| 7876| ADAMS|    CLERK|7788|23-MAY-87|NULL|    20|1100|    19625|
+| 7902|  FORD|  ANALYST|7566|03-DEC-81|NULL|    20|3000|    19625|
+| 7499| ALLEN| SALESMAN|7698|20-FEB-81| 300|    30|1600|    29025|
+| 7521|  WARD| SALESMAN|7698|22-FEB-81| 500|    30|1250|    29025|
+| 7654|MARTIN| SALESMAN|7698|28-SEP-81|1400|    30|1250|    29025|
+| 7698| BLAKE|  MANAGER|7839|01-MAY-81|NULL|    30|2850|    29025|
+| 7844|TURNER| SALESMAN|7698|08-SEP-81|   0|    30|1500|    29025|
+| 7900| JAMES|    CLERK|7698|03-DEC-81|NULL|    30| 950|    29025
+
+3.d) without partition by and order by ,its optional according to the requirement we can create batch like dept,Sex.
+select EMPNO , ENAME, JOB, MGR, HIREDATE, COMM,DEPTNO,SAL, sum(SAL) 
+over() as Cumul_Sal from emp_tbl
+
+EMPNO| ENAME|      JOB| MGR| HIREDATE|COMM|DEPTNO| SAL|Cumul_Sal|
++-----+------+---------+----+---------+----+------+----+---------+
+| 7369| SMITH|    CLERK|7902|17-DEC-80|NULL|    20| 800|    29025|
+| 7499| ALLEN| SALESMAN|7698|20-FEB-81| 300|    30|1600|    29025|
+| 7521|  WARD| SALESMAN|7698|22-FEB-81| 500|    30|1250|    29025|
+| 7566| JONES|  MANAGER|7839|02-APR-81|NULL|    20|2975|    29025|
+| 7654|MARTIN| SALESMAN|7698|28-SEP-81|1400|    30|1250|    29025|
+| 7698| BLAKE|  MANAGER|7839|01-MAY-81|NULL|    30|2850|    29025|
+| 7782| CLARK|  MANAGER|7839|09-JUN-81|NULL|    10|2450|    29025|
+| 7788| SCOTT|  ANALYST|7566|19-APR-87|NULL|    20|3000|    29025|
+| 7839|  KING|PRESIDENT|NULL|17-NOV-81|NULL|    10|5000|    29025|
+| 7844|TURNER| SALESMAN|7698|08-SEP-81|   0|    30|1500|    29025|
+| 7876| ADAMS|    CLERK|7788|23-MAY-87|NULL|    20|1100|    29025|
+| 7900| JAMES|    CLERK|7698|03-DEC-81|NULL|    30| 950|    29025|
+| 7902|  FORD|  ANALYST|7566|03-DEC-81|NULL|    20|3000|    29025|
+| 7934|MILLER|    CLERK|7782|23-JAN-82|NULL|    10|1300|    29025
+
+
+select EMPNO , ENAME, JOB, MGR, HIREDATE, COMM,ENAME,DEPTNO,SAL,  
+row_number() over(order by SAL) as RowNum_Sal,
+rank() over(order by SAL) as rank_Sal ,
+dense_rank() over(order by SAL) as dense_Sal 
+from emp_tbl
+
+
+*******************************************************************************
+
+Conceptual Questions
+These test understanding of window function fundamentals.
+What is a window function in SQL, and how does it differ from an aggregate function?
+What’s the difference between PARTITION BY and GROUP BY?
+What does ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW mean?
+How is RANGE different from ROWS in a window clause?
+What happens if you use a window function without PARTITION BY?
+
+
+Q1 Write a query to find the top 2 salaried employees in each department.
+SELECT * FROM (
+  SELECT *, RANK() OVER (PARTITION BY deptno ORDER BY sal DESC) as rnk
+  FROM emp
+) t
+WHERE rnk <= 2;
+
+question was asked department thats we used PARTITION BY deptno 
+
+Q2 :Top 2 Salaried Employees (Overall)— globally
+
+SELECT *
+FROM (
+  SELECT *,
+         RANK() OVER (ORDER BY SAL DESC) AS salary_rank
+  FROM emp_tbl
+) ranked
+WHERE salary_rank <= 2;
+
+ Explanation:
+RANK() assigns the same rank if two employees have the same salary + also there is a problem with RANK() in ranking sequence no # 
+(Skips ranks on ties?	✅ Yes (skips)) and Handles ties: Assigns same rank, next rank is skipped. and Ranking behavior:Like Olympic podium (1, 2, 2, 4)
+
+ENAME	SALARY	salary_rank
+Alice	5000	1
+Bob	4000	2
+Charlie	4000	2
+David	3000	4
+
+
+DENSE_RANK() Skips ranks on ties?: No skip (dense ranking) this is GOOD and Handles ties: Assigns same rank, next rank is sequential,and Ranking behavior: Like dense stack (1, 2, 2, 3).
+
+This query returns all employees who rank in the top 2, including ties.
+
+RANK() and DENSE_RANK() allow ties (e.g., two employees with the same salary both rank 1).
+ROW_NUMBER() gives unique row numbers — no ties.
+
+When to Use What?
+Use RANK() if you're doing leaderboards where position gaps matter.
+Use DENSE_RANK() when you just need unique rank values without gaps.
+Use ROW_NUMBER() when ties should be broken arbitrarily
+
+******************************************
+
+#same sal in table
+sqlStr = "with same_sal as (select sal ,count(empno) from emp_tbl group by SAL having count(empno)>1) \
+             Select a.* from emp_tbl a , same_sal b where a.sal=b.sal 
+
+EMPNO| ENAME|     JOB| MGR| HIREDATE| SAL|COMM|DEPTNO|
++-----+------+--------+----+---------+----+----+------+
+| 7521|  WARD|SALESMAN|7698|22-FEB-81|1250| 500|    30|
+| 7654|MARTIN|SALESMAN|7698|28-SEP-81|1250|1400|    30|
+| 7788| SCOTT| ANALYST|7566|19-APR-87|3000|NULL|    20|
+| 7902|  FORD| ANALYST|7566|03-DEC-81|3000|NULL|    20|
++-----+------+--------+----+---------+----+----+------+
+
+
+. SQL & Database Design
+What is the difference between INNER JOIN, LEFT JOIN, and FULL OUTER JOIN?
+
+How would you optimize a slow SQL query?
+
+Explain normalization and denormalization.
+
+How do you handle slow-changing dimensions (SCD) in data warehouses?
+
+What’s the difference between OLTP vs OLAP databases?
+
+🔹 2. Data Modeling & Warehousing
+What is a star schema vs snowflake schema?
+
+Explain ETL vs ELT. When would you use one over the other?
+
+How do you design a data pipeline for a retail e-commerce platform?
+
+What is a fact table vs dimension table?
+
+Tools you’ve used: DBT, Airflow, AWS Glue, Informatica, etc.?
+
+🔹 3. Big Data & Distributed Systems
+How does Apache Spark work? What is an RDD vs DataFrame?
+
+What are partitions and shuffling in Spark?
+
+What are best practices to optimize a Spark job?
+
+Explain the role of YARN or Kubernetes in big data ecosystems.
+
+What is the CAP theorem?
+
+🔹 4. Cloud Data Engineering (AWS/Azure/GCP)
+What is the difference between S3, Redshift, and Athena?
+
+How do you implement data lakes on AWS?
+
+How do you secure data pipelines in the cloud?
+
+Compare Redshift vs Snowflake vs BigQuery.
+
+What’s your experience with Terraform/IaC for data infra?
+
+🔹 5. Python & Scripting
+How do you handle large files in Python efficiently?
+
+What are generators, and why are they useful in ETL scripts?
+
+Explain pandas vs PySpark usage.
+
+Write a Python function to remove duplicates from a list of dictionaries.
+
+How do you log and monitor your Python-based pipelines?
+
+🔹 6. Data Quality & Monitoring
+How do you handle data validation in pipelines?
+
+What’s your approach for schema evolution in streaming data?
+
+How do you detect data anomalies or drift?
+
+Tools you’ve used for observability (e.g., Great Expectations, Monte Carlo)?
+
+🔹 7. Behavioral / Scenario-Based
+Tell me about a failed data pipeline you built and how you fixed it.
+
+Describe a situation where you improved data latency significantly.
+
+How do you collaborate with data scientists or analysts?
+
+How do you prioritize between business deadlines and data quality?
+
+🔹 8. Bonus: Git, DevOps & CI/CD
+How do you version control data models or SQL scripts?
+
+Describe your CI/CD process for data pipeline deployment.
+
+Have you used Docker or Airflow DAGs in production?
+
+✅ Pro Tips for Preparation:
+Mock SQL Problems: Try LeetCode (SQL) or Mode Analytics SQL exercises.
+
+Spark Projects: Build a small ETL pipeline using PySpark on a public dataset.
+
+Cloud Hands-On: Practice building data workflows in a sandbox AWS/GCP project.
+
+Would you like me to create:
+
+A PDF cheat sheet of these questions?
+
+A mock interview Q&A style version?
+
+Company-specific questions (e.g., AWS Data Engineer interview, TCS, Google, etc.)?
+
+
+
+
+
+
+Mutable Default Argument
+python
+Copy
+Edit
+def append_to_list(val, my_list=[]):
+    my_list.append(val)
+    return my_list
+
+print(append_to_list(1))
+print(append_to_list(2))
+What will be the output? Why?
+
+✅ Trick: Default arguments are evaluated only once.
+
+🧠 2. is vs ==
+python
+Copy
+Edit
+a = 257
+b = 257
+print(a is b)
+Why might this return False, even if a == b is True?
+
+✅ Trick: Python caches small integers between -5 and 256.
+
+🧠 3. Chained Comparison
+python
+Copy
+Edit
+print(3 < 4 < 5)
+print(3 < 5 > 4)
+print((3 < 5) > 4)
+Which are True/False and why?
+
+✅ Trick: Python allows chained comparisons that evaluate like math.
+
+🧠 4. Unexpected Scope
+python
+Copy
+Edit
+x = 'global'
+
+def outer():
+    x = 'outer'
+    def inner():
+        print(x)
+    inner()
+
+outer()
+What will inner() print? Can you explain LEGB (scope resolution)?
+
+🧠 5. List Multiplication Trap
+python
+Copy
+Edit
+a = [[0] * 3] * 3
+a[0][0] = 1
+print(a)
+Why do all rows change, not just the first?
+
+✅ Trick: List multiplication creates shallow copies.
+
+🧠 6. Generator Surprise
+python
+Copy
+Edit
+def gen():
+    for i in range(3):
+        yield i
+
+g = gen()
+print(list(g))
+print(list(g))
+Why does the second print show an empty list?
+
+✅ Trick: Generators are exhausted once iterated.
+
+🧠 7. Sorting Gotcha with sort()
+python
+Copy
+Edit
+a = [3, 1, 2]
+b = a.sort()
+print(b)
+Why is b None?
+
+✅ Trick: list.sort() sorts in-place and returns None.
+
+🧠 8. String Interning
+python
+Copy
+Edit
+a = "hello"
+b = "hello"
+print(a is b)
+
+a = "hello world!"
+b = "hello world!"
+print(a is b)
+Why might the second comparison return False depending on implementation?
+
+✅ Trick: Python interns some strings but not all.
+
+🧠 9. Boolean Arithmetic
+python
+Copy
+Edit
+print(True + True + False)
+print(True * 5)
+Why does Python allow arithmetic with booleans?
+
+✅ Trick: True is 1, False is 0 in Python.
+
+🧠 10. Comprehension Scope
+python
+Copy
+Edit
+x = 10
+print([x for x in range(5)])
+print(x)
+Will x still be 10 after the list comprehension?
+
+✅ In Python 3.x, yes — comprehension has its own scope.
+
+
+
+
+aclass Animal:
+def __ init __ (self, name):
+self.name = name
+self.is_alive = True
+
+def make_sound(self):
+print("Some generic sound")
+
+aclass Dog(Animal):
+def __ init __ (self, name, breed):
+self.breed = breed
+Animal .__ init __ (self, name)
+
+def make_sound(self):
+print("Bark")
+
+eclass Cat(Animal):
+def __ init __ (self, name):
+self.name = name
+self.is_alive = True
+
+def make_sound(self):
+print("Meow")
+
+eclass Bird(Animal):
+def __ init __ (self, name, can_fly):
+self.name = name
+self.can_fly = can_fly
+
+def make_sound(self):
+print("Tweet")
+
+def fly(self):
+if self.can_fly:
+print(f"{self.name} is flying!")
+else:
+print(f"{self.name} can't fly.")
+
+
