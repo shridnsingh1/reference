@@ -1,0 +1,151 @@
+Anil Agarwal,#FromBihar#Founder:Vedanta:MRKCAP:174325Cr/$20.68Bimport pandas as pd
+
+# Example DataFrame
+df = pd.DataFrame({
+    'name': ['Alice', 'Bob', 'Alice', 'Charlie', 'Bob'],
+    'age': [25, 30, 25, 35, 30]
+})
+
+# Remove duplicate rows
+df_clean = df.drop_duplicates()
+
+print(df_clean)
+🔧 If you want to drop duplicates based on specific columns:
+python
+Copy
+Edit
+df_clean = df.drop_duplicates(subset=['name'])  # Keeps first occurrence of each name
+Add keep='last' to keep the last occurrence:
+
+python
+Copy
+Edit
+df_clean = df.drop_duplicates(subset=['name'], keep='last')
+🗑 To drop in-place (without creating a new DataFrame):
+python
+Copy
+Edit
+df.drop_duplicates(inplace=True)
+
+
+
+
+
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("DedupExample").getOrCreate()
+
+data = [
+    ("Alice", 25),
+    ("Bob", 30),
+    ("Alice", 25),
+    ("Charlie", 35),
+    ("Bob", 30)
+]
+
+columns = ["name", "age"]
+df = spark.createDataFrame(data, columns)
+
+# Remove full duplicate rows
+df_clean = df.dropDuplicates()
+
+df_clean.show()
+Output:
+
+pgsql
+Copy
+Edit
++-------+---+
+|   name|age|
++-------+---+
+| Charlie| 35|
+|   Alice| 25|
+|     Bob| 30|
++-------+---+
+
+
+
+
+
+
+To convert a pandas DataFrame to a Spark DataFrame, you can use PySpark’s createDataFrame() function from a SparkSession.
+
+✅ Step-by-step Example:
+python
+Copy
+Edit
+import pandas as pd
+from pyspark.sql import SparkSession
+
+# Step 1: Create pandas DataFrame
+pdf = pd.DataFrame({
+    'name': ['Alice', 'Bob', 'Charlie'],
+    'age': [25, 30, 35]
+})
+
+# Step 2: Initialize Spark session
+spark = SparkSession.builder.appName("PandasToSpark").getOrCreate()
+
+# Step 3: Convert pandas DataFrame to Spark DataFrame
+spark_df = spark.createDataFrame(pdf)
+
+# Show Spark DataFrame
+spark_df.show()
+📌 Output:
+pgsql
+Copy
+Edit
++-------+---+
+|   name|age|
++-------+---+
+|  Alice| 25|
+|    Bob| 30|
+|Charlie| 35|
++-------+---+
+🧠 Notes:
+PySpark infers schema types from the pandas DataFrame.
+
+If you want to explicitly define the schema, you can pass a schema argument to createDataFrame().
+
+
+To convert a Spark DataFrame to a pandas DataFrame, use the .toPandas() method:
+
+✅ Example:
+python
+Copy
+Edit
+# Assuming you already have a Spark DataFrame called spark_df
+pandas_df = spark_df.toPandas()
+
+# Now pandas_df is a regular pandas DataFrame
+print(pandas_df.head())
+⚠️ Important Notes:
+.toPandas() collects all data to the driver, so:
+
+✅ Fine for small to medium datasets
+
+⚠️ Avoid on large datasets — may cause memory overflow
+
+🧠 Tip for Large Data:
+If the Spark DataFrame is too big, you can limit rows first:
+
+python
+Copy
+Edit
+pandas_df = spark_df.limit(1000).toPandas()
+Or save to a file (like CSV or Parquet) and read it using pandas:
+
+python
+Copy
+Edit
+spark_df.write.csv("data.csv", header=True)
+Then read in pandas:
+
+python
+Copy
+Edit
+import pandas as pd
+df = pd.read_csv("data.csv")
+
+
+
