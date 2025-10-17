@@ -1,0 +1,254 @@
+3) FI Documents & Line Items
+
+BKPF Accounting document header: PK (MANDT, BUKRS, GJAHR, BELNR); keys: BLART, BUDAT, WAERS, source link AWTYP/AWKEY
+
+BSEG Line items: PK (MANDT, BUKRS, GJAHR, BELNR, BUZEI); keys: HKONT (GL), KUNNR, LIFNR, DMBTR, WRBTR
+
+FAGLFLEXA New GL line-item/ledger view (doc-based); typically joins back to BKPF/BSEG via (RBUKRS=BUKRS, GJAHR, BELNR [, DOCLN↔BUZEI]) where populated.
+
+Open/Cleared items (derived from BSEG)
+
+BSID / BSAD Customer open/cleared: (BUKRS, KUNNR, GJAHR, BELNR, BUZEI)
+
+BSIK / BSAK Vendor open/cleared: (BUKRS, LIFNR, GJAHR, BELNR, BUZEI)
+
+Joins
+
+-- Header → line items
+select h.bukrs, h.gjahr, h.belnr, h.blart, i.buzei, i.hkont, i.kunnr, i.lifnr, i.dmbtr
+from bkpf h
+join bseg i
+  on i.mandt=h.mandt and i.bukrs=h.bukrs and i.gjahr=h.gjahr and i.belnr=h.belnr
+where h.mandt=:mandt;
+
+-- Open items (customer)
+select b.*
+from bsid b
+join bkpf h
+  on h.mandt=b.mandt and h.bukrs=b.bukrs and h.gjahr=b.gjahr and h.belnr=b.belnr
+where b.mandt=:mandt;
+
+4) Business Partners (Customer & Vendor) + Addresses
+
+Addresses
+
+ADRC: ADDRNUMBER (address number)
+
+Customers
+
+KNA1 General: KUNNR, ADRNR → ADRC
+
+KNB1 Company: KUNNR, BUKRS
+
+KNVP Partner functions: KUNNR, VKORG, VTWEG, SPART, PARVW
+
+(Note) You listed KNW; if you meant KNVV (sales-area data), key is KUNNR, VKORG, VTWEG, SPART.
+
+Vendors
+
+LFA1 General: LIFNR, ADRNR → ADRC
+
+LFB1 Company: LIFNR, BUKRS
+
+LFM1 Vendor-Purch.Org: LIFNR, EKORG
+
+LFM2 Vendor-subrange/Purch.Org (optional): LIFNR, EKORG, WERKS (varies by config)
+
+Joins
+
+-- Customer master with address
+select k.kunnr, k.name1, a.city1, a.post_code1
+from kna1 k
+left join adrc a
+  on a.mandt=k.mandt and a.addrnumber=k.adrnr
+where k.mandt=:mandt;
+
+-- Vendor master with company code view
+select v.lifnr, v.name1, vc.bukrs, vc.zterm
+from lfa1 v
+join lfb1 vc
+  on vc.mandt=v.mandt and vc.lifnr=v.lifnr and vc.bukrs=:bukrs
+where v.mandt=:mandt;
+
+5) CO: Cost & Profit Centers
+
+CSKS Cost center master: KOKRS (controlling area), KOSTL, DATBI/DATAB (validity); text in CSKT: KOKRS, KOSTL, SPRAS, DATBI
+
+CEPC Profit center: PRCTR, KOKRS; text in CEPCT: PRCTR, KOKRS, SPRAS
+
+Joins
+
+-- Cost center with text (as-of date)
+select k.kokrs, k.kostl, t.ltext
+from csks k
+left join cskt t
+  on t.mandt=k.mandt and t.kokrs=k.kokrs and t.kostl=k.kostl and t.spras=:spras
+where k.mandt=:mandt
+  and :date between k.datab and k.datbi;
+
+
+(You listed “CEPC CEPCT (SKS”; assuming you meant CSKS and CSKT.)
+
+6) Materials & Purchasing (for FI/MM integrations)
+
+Materials
+
+MARA Material: MATNR
+
+MAKT Material text: MATNR, SPRAS
+
+MARC Material-Plant: MATNR, WERKS
+
+MARD Material-SLoc: MATNR, WERKS, LGORT
+
+MARM Units of measure: MATNR, MEINH
+
+T023/T023T Material group + text: MATKL (+ SPRAS)
+
+Purchasing
+
+EKKO PO header: EBELN
+
+EKPO PO item: EBELN, EBELP
+
+T024 Purchasing groups: EKGRP
+
+T024E Purchasing orgs: EKORG
+
+Invoice verification
+
+RBKP MM invoice header: BELNR (RBKP), GJAHR, BUKRS, WAERS
+
+RSEG MM invoice item: BELNR(RBKP), GJAHR, BUZEI; carries EBELN, EBELP back to EKPO
+
+Joins
+
+-- PO: header → items
+select h.ebeln, h.bukrs, i.ebelp, i.matnr, i.werks, i.menge, i.netpr
+from ekko h
+join ekpo i
+  on i.mandt=h.mandt and i.ebeln=h.ebeln
+where h.mandt=:mandt;
+
+-- MM invoice item → PO item → material
+select r.belnr as rbkp_belnr, r.gjahr, r.buzei, r.ebeln, r.ebelp, p.matnr, m.maktx
+from rseg r
+join ekpo p
+  on p.mandt=r.mandt and p.ebeln=r.ebeln and p.ebelp=r.ebelp
+left join makt m
+  on m.mandt=p.mandt and m.matnr=p.matnr and m.spras=:spras
+where r.mandt=:mandt;
+
+7) SD Billing (links back to FI)
+
+VBRK Billing header: VBELN (billing doc), FKART, KUNNR, VKORG, FKDAT (billing date), WAERK
+
+VBRP Billing item: VBELN, POSNR, MATNR, FKIMG, NETWR
+
+TVFK/TVFKT Billing type + text: FKART (+ SPRAS)
+
+TVKO Sales org: VKORG
+
+TVTWT (Tax classification text; varies by config)
+
+Accounting link (common pattern)
+
+From FI back to SD: BKPF.AWTYP='VBRK' and BKPF.AWKEY=VBRK-VBELN (or use the accounting document number stored via SD→FI interface if present).
+
+Joins
+
+-- Billing ↔ accounting document via AWTYP/AWKEY
+select b.vbeln, b.fkart, k.bukrs, k.belnr, k.gjahr
+from vbrk b
+join bkpf k
+  on k.mandt=b.mandt
+ and k.awtyp='VBRK'
+ and k.awkey=b.vbeln   -- sometimes padded/concatenated; check client-specific AWKEY format
+where b.mandt=:mandt;
+
+8) Master/Customizing “glue” (texts & groups)
+
+T077K / T077Y / T077X Account-group customizing & texts (commonly customer/vendor groups); join from KNA1.KTOKD or LFA1.KTOKK to the respective table key; also SPRAS for text variants.
+
+T008T Text for allocation keys/reason codes (depends on use); join by its key + SPRAS.
+
+TVFKT, T023T, CSKT, CEPCT, SKAT — all are text tables (…T) and join to their base by base-key + SPRAS.
+
+9) Frequently-used Join Recipes (copy/paste)
+
+A) FI document → GL account + GL text
+
+select i.bukrs, i.gjahr, i.belnr, i.buzei, i.hkont, t.txt50 as gl_text
+from bseg i
+join bkpf h
+  on h.mandt=i.mandt and h.bukrs=i.bukrs and h.gjahr=i.gjahr and h.belnr=i.belnr
+join t001 c
+  on c.mandt=i.mandt and c.bukrs=i.bukrs
+join ska1 g
+  on g.mandt=i.mandt and g.ktopl=c.ktopl and g.saknr=i.hkont
+left join skat t
+  on t.mandt=g.mandt and t.ktopl=g.ktopl and t.saknr=g.saknr and t.spras=:spras
+where i.mandt=:mandt;
+
+
+B) FI customer line → customer master (+ address)
+
+select i.bukrs, i.gjahr, i.belnr, i.buzei, i.kunnr, cust.name1, adr.city1
+from bseg i
+left join kna1 cust
+  on cust.mandt=i.mandt and cust.kunnr=i.kunnr
+left join adrc adr
+  on adr.mandt=cust.mandt and adr.addrnumber=cust.adrnr
+where i.mandt=:mandt and i.kunnr<>'';  -- customer lines only
+
+
+C) FI vendor line → vendor master (+ company code view)
+
+select i.bukrs, i.gjahr, i.belnr, i.buzei, i.lifnr, ven.name1, vcc.zterm
+from bseg i
+left join lfa1 ven
+  on ven.mandt=i.mandt and ven.lifnr=i.lifnr
+left join lfb1 vcc
+  on vcc.mandt=i.mandt and vcc.lifnr=i.lifnr and vcc.bukrs=i.bukrs
+where i.mandt=:mandt and i.lifnr<>'';
+
+
+D) PO → GR/IR invoice (MM) → FI document
+
+-- RSEG item → EKPO (PO item) → BKPF/BSEG via accounting doc stored on RBKP/RSEG (client-specific)
+select r.belnr as rbkp_belnr, r.gjahr, r.buzei, r.ebeln, r.ebelp, p.matnr
+from rseg r
+join ekpo p
+  on p.mandt=r.mandt and p.ebeln=r.ebeln and p.ebelp=r.ebelp
+where r.mandt=:mandt;
+
+
+E) New GL line (FAGLFLEXA) → FI
+
+select f.rbukrs as bukrs, f.gjahr, f.belnr, f.docln as buzei, f.racct as saknr
+from faglflexa f
+join bkpf h
+  on h.mandt=f.rclnt and h.bukrs=f.rbukrs and h.gjahr=f.gjahr and h.belnr=f.belnr
+where f.rclnt=:mandt;
+
+10) Gotchas & best practices
+
+Client field: Always filter MANDT to avoid cross-client noise.
+
+AWKEY format: It can be concatenated/padded; test with a few known documents before relying on it for SD/MM→FI back-links.
+
+Validity intervals: CO objects (CSKS/CSKT) and some texts have DATAB/DATBI; join with an “as-of date”.
+
+Chart of accounts: To resolve GL texts correctly, derive KTOPL from T001 for the company code and join via (KTOPL, SAKNR).
+
+Open/cleared item tables (BS) are snapshots** derived from BSEG. If completeness matters, reconcile with BSEG.
+
+IDs with leading zeros: Ensure your ETL preserves them (use string types).
+
+Possible typos in your list (verify in your system):
+
+KNW → likely KNVV (Customer Sales Area).
+
+(SKS → likely CSKS (Cost center master).
+
+TOURT → likely TCURT (Currency text).
