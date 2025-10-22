@@ -1,0 +1,60 @@
+PT – RLP: New SAP Instance Setup Steps
+
+1. Create SAP Audit Metadata File
+   •   Create a new file: sap_auditmetadata.csv containing all SAP table details for PT-RLP.
+   •   Location:
+awsrepo/src/glue_code/sapptr1p/sap_auditmetadata/
+
+⸻
+
+2. Create New AWS Step Function JSON
+   •   File name: step_func_orchestrate_sapptrlp.json
+   •   Place it in the new instance folder:
+awsrepo/src/step_function/dev/sapptrlp/
+
+⸻
+
+3. Update Terraform Variables for Step Function Deployment
+   •   Update terraform.tfvars to include the new variable state_machine10.
+   •   Terraform will deploy this new Step Function to AWS.
+   •   Path:
+awsrepo/iac/us-east-2/dev/stepfunction/
+
+⸻
+
+4. Create Lambda Python Codes
+Create the following Lambda scripts under:
+src/lambda_code/sapptrlp/
+   •   lambda_insert.py
+   •   lambda_call_extracts.py
+   •   lambda_check_status_extracts.py
+   •   trigger_glueworkflow.py
+
+Note:
+The trigger_glueworkflow.py script calls the following Glue Workflow:
+GLUE_WORKFLOW_NAME = "DAW-tennecosapptrlp-care-proc-workflow"
+
+⸻
+
+5. Update Lambda Terraform Variables
+   •   In terraform.tfvars, add new variables (e.g., Lambda361, Lambda362, …)
+   •   Define the SAP tables under:
+EXTRACTNAMES = "BSEG, ...".
+   •   These Lambda functions will be triggered by the Step Function JSON created earlier.
+   •   Folder Path:
+awsrepo/iac/us-east-2/dev/lambda/
+
+⸻
+
+6. Define Glue Jobs for S3 → GL Load
+   •   Create a new terraform.tfvars file defining all Glue jobs for S3 to GL data movement.
+   •   Folder Path:
+awsrepo/iac/us-east-2/dev/glue/sapptrlp/
+
+⸻
+
+7. Create Glue Workflow Terraform File
+   •   Create glue-workflow-ingestion.tf to orchestrate dependencies among the Glue jobs defined in Step 6.
+   •   This ensures sequential job execution (S3 → GL).
+   •   Folder Path:
+awsrepo/iac/us-east-2/prod/glue/sapptrlp/
