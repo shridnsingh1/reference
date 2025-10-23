@@ -7,3 +7,28 @@ matches = re.findall(r"(?i)lambda.{0,5}", text)   # (?i) makes it case-insensiti
 
 for m in matches:
     print(m)
+
+
+
+
+
+import re
+
+def find_lambda_snippets(file_path):
+    with open(file_path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    # Regex: find "lambda" (any case) plus next 5 chars
+    pattern = re.compile(r"lambda.{0,5}", re.IGNORECASE)
+
+    matches = pattern.findall(text)
+    return matches
+
+
+if __name__ == "__main__":
+    file_path = r"C:\Shailendra\sample.txt"   # 👈 your text file path
+    results = find_lambda_snippets(file_path)
+
+    print("✅ Matches found:")
+    for item in results:
+        print(item)
