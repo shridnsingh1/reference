@@ -1,3 +1,4 @@
+
 import re
 
 text = "Here is Lambda123 and another LAMBDAxyz99 function, plus lambdaTest."
@@ -32,3 +33,41 @@ if __name__ == "__main__":
     print("✅ Matches found:")
     for item in results:
         print(item)
+
+
+
+import re
+import pandas as pd
+
+def find_lambda_numeric(file_path, output_file):
+    results = []
+
+    # Read text from file
+    with open(file_path, "r", encoding="utf-8") as f:
+        text = f.read()
+
+    # Regex: find 'lambda' (case-insensitive) followed immediately by 1–5 digits
+    pattern = re.compile(r"lambda(\d{1,5})", re.IGNORECASE)
+
+    for match in pattern.findall(text):
+        word = "lambda" + match
+        results.append(word)
+
+    # Remove duplicates
+    unique_results = sorted(set(results))
+
+    # Save to CSV
+    df = pd.DataFrame(unique_results, columns=["Lambda_Matches"])
+    df.to_csv(output_file, index=False)
+
+    print(f"✅ Found {len(unique_results)} matches")
+    print(f"📂 Results saved to: {output_file}")
+    return unique_results
+
+
+if __name__ == "__main__":
+    file_path = r"C:\Shailendra\TENNECO WORK\sample.txt"         # 👈 replace with your input file
+    output_file = r"C:\Shailendra\TENNECO WORK\lambda_matches.csv"  # 👈 CSV output file
+
+    matches = find_lambda_numeric(file_path, output_file)
+    print("Matches:", matches)
