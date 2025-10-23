@@ -71,3 +71,46 @@ if __name__ == "__main__":
 
     matches = find_lambda_numeric(file_path, output_file)
     print("Matches:", matches)
+
+
+
+
+import re
+import pandas as pd
+
+def find_lambda_numeric_exact(file_path, output_file):
+    results = []
+
+    # Read file content line by line (to preserve sequence)
+    with open(file_path, "r", encoding="utf-8") as f:
+        for line in f:
+            # Find all lambda + digits patterns (1–10 digits) in this line, case-insensitive
+            matches = re.findall(r"(?i)\blambda\d{1,10}\b", line)
+            for m in matches:
+                results.append(m)  # keep exact case as in file
+
+    # Keep sequence as in file, remove duplicates but maintain order
+    seen = set()
+    ordered_unique = []
+    for item in results:
+        if item not in seen:
+            seen.add(item)
+            ordered_unique.append(item)
+
+    # Save to CSV
+    df = pd.DataFrame(ordered_unique, columns=["Lambda_Matches"])
+    df.to_csv(output_file, index=False, encoding="utf-8")
+
+    print(f"✅ Found {len(ordered_unique)} matches")
+    print(f"📂 Results saved to: {output_file}")
+    return ordered_unique
+
+
+if __name__ == "__main__":
+    file_path = r"C:\Shailendra\TENNECO WORK\sample.txt"         # 👈 your input file
+    output_file = r"C:\Shailendra\TENNECO WORK\lambda_matches.csv"  # 👈 output file
+
+    matches = find_lambda_numeric_exact(file_path, output_file)
+    print("\nExtracted in order:")
+    for m in matches:
+        print("  ", m)
