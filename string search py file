@@ -1,0 +1,9 @@
+import re
+
+text = "Here is Lambda123 and another LAMBDAxyz99 function, plus lambdaTest."
+
+# find all occurrences of "lambda" + 5 more characters
+matches = re.findall(r"(?i)lambda.{0,5}", text)   # (?i) makes it case-insensitive
+
+for m in matches:
+    print(m)
