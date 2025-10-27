@@ -3,8 +3,8 @@ import re
 from pathlib import Path
 
 # 🧩 === Configuration ===
-template_path = r"C:\Shailendra\ytc WORK\template.sql"   # 👈 Path to your template file
-output_folder = r"C:\Shailendra\ytf WORK\Generated_SQL"  # 👈 Output folder
+template_path = r"C:\Shailendra\ycf WORK\template.sql"   # 👈 Path to your template file
+output_folder = r"C:\Shailendra\tcv WORK\Generated_SQL"  # 👈 Output folder
 table_names = ["Abn", "rig", "yurt"]                         # 👈 List of table names
 # ========================
 
@@ -24,8 +24,11 @@ def render_template(template_text: str, table_name: str) -> str:
         .replace("{{TABLE_NAME_LOWER}}", table_name.lower())
     )
 
-    # Replace 'adrc' (case-insensitive) with the actual table name
+    # Replace both 'adrc_' and 'adrc' (case-insensitive)
+    # Important: replace 'adrc_' first to avoid double replacement
+    text = re.sub(r"\badrc_", table_name + "_", text, flags=re.IGNORECASE)
     text = re.sub(r"\badrc\b", table_name, text, flags=re.IGNORECASE)
+
     return text
 
 
