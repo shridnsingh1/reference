@@ -3,8 +3,8 @@ import re
 from pathlib import Path
 
 # 🧩 === Configuration ===
-template_path = r"C:\Shailendra\tsc WORK\template.sql"   # 👈 Path to your template file
-output_folder = r"C:\Shailendra\tsc WORK\Generated_SQL"  # 👈 Folder where new files will be created
+template_path = r"C:\Shailendra\ytc WORK\template.sql"   # 👈 Path to your template file
+output_folder = r"C:\Shailendra\ytf WORK\Generated_SQL"  # 👈 Output folder
 table_names = ["Abn", "rig", "yurt"]                         # 👈 List of table names
 # ========================
 
@@ -15,17 +15,21 @@ def clean_table_name(name: str) -> str:
 
 
 def render_template(template_text: str, table_name: str) -> str:
-    """Replace placeholders in the template."""
-    return (
+    """Replace placeholders and ADRC references in the template."""
+    # Replace placeholders
+    text = (
         template_text
         .replace("{{TABLE_NAME}}", table_name)
         .replace("{{TABLE_NAME_UPPER}}", table_name.upper())
         .replace("{{TABLE_NAME_LOWER}}", table_name.lower())
     )
 
+    # Replace 'adrc' (case-insensitive) with the actual table name
+    text = re.sub(r"\badrc\b", table_name, text, flags=re.IGNORECASE)
+    return text
+
 
 def main():
-    # Ensure output folder exists
     os.makedirs(output_folder, exist_ok=True)
 
     # Read the template file
@@ -36,12 +40,11 @@ def main():
         print(f"❌ Error reading template: {e}")
         return
 
-    # Generate files
     for table in table_names:
         clean_name = clean_table_name(table)
         rendered_sql = render_template(template_content, clean_name)
 
-        # File name pattern: sp_tcs_stage_{table_name_lower}_scrf_insert.sql
+        # File naming pattern
         file_name = f"sp_tcs_stage_{clean_name.lower()}_scrf_insert.sql"
         output_file = Path(output_folder) / file_name
 
