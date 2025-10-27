@@ -3,8 +3,8 @@ import re
 from pathlib import Path
 
 # 🧩 === Configuration ===
-template_path = r"C:\Shailendra\TENNECO WORK\template.sql"   # 👈 Path to your template file
-output_folder = r"C:\Shailendra\TENNECO WORK\Generated_SQL"  # 👈 Folder where new files will be created
+template_path = r"C:\Shailendra\tsc WORK\template.sql"   # 👈 Path to your template file
+output_folder = r"C:\Shailendra\tsc WORK\Generated_SQL"  # 👈 Folder where new files will be created
 table_names = ["Abn", "rig", "yurt"]                         # 👈 List of table names
 # ========================
 
