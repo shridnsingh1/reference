@@ -1,0 +1,56 @@
+import argparse
+import os
+import re
+from pathlib import Path
+
+def parse_tables(tables_raw: str):
+    # Accept formats like "{Abn,rig,yurt}" or "Abn,rig,yurt"
+    cleaned = tables_raw.strip().strip("{}")
+    items = [t.strip() for t in cleaned.split(",") if t.strip()]
+    # Keep only safe filename chars
+    safe_items = [re.sub(r"[^A-Za-z0-9_-]", "_", t) for t in items]
+    return safe_items
+
+def render(template: str, name: str):
+    return (template
+            .replace("{{TABLE_NAME}}", name)
+            .replace("{{TABLE_NAME_UPPER}}", name.upper())
+            .replace("{{TABLE_NAME_LOWER}}", name.lower()))
+
+def main():
+    ap = argparse.ArgumentParser(description="Create files from a template for a list of table names.")
+    ap.add_argument("--template", "-t", required=True, help="Path to the template file (e.g., template.sql)")
+    ap.add_argument("--tables", "-n", required=True, help='List of table names, e.g. "{Abn,rig,yurt}" or "Abn,rig,yurt"')
+    ap.add_argument("--outdir", "-o", default="out", help="Output directory (default: ./out)")
+    ap.add_argument("--ext", default="sql", help="File extension for generated files (default: sql)")
+    args = ap.parse_args()
+
+    template_path = Path(args.template)
+    outdir = Path(args.outdir)
+    outdir.mkdir(parents=True, exist_ok=True)
+
+    try:
+        template_text = template_path.read_text(encoding="utf-8")
+    except Exception as e:
+        raise SystemExit(f"Failed to read template: {e}")
+
+    tables = parse_tables(args.tables)
+    if not tables:
+        raise SystemExit("No table names parsed. Check --tables input.")
+
+    created = []
+    for tbl in tables:
+        content = render(template_text, tbl)
+        outfile = outdir / f"{tbl}.{args.ext}"
+        try:
+            outfile.write_text(content, encoding="utf-8")
+            created.append(str(outfile))
+        except Exception as e:
+            print(f"⚠️  Failed to write {outfile}: {e}")
+
+    print("✅ Generated files:")
+    for p in created:
+        print("  -", p)
+
+if __name__ == "__main__":
+    main()
