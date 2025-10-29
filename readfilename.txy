@@ -1,0 +1,46 @@
+import os
+
+folder_path = r"C:\Shailendra\TENNECO WORK\Generated_SQL"
+
+# List all file names
+files = os.listdir(folder_path)
+
+print("📂 Files in folder:")
+for file in files:
+    print(file)
+
+
+
+import os
+
+folder_path = r"C:\Shailendra\TENNECO WORK\Generated_SQL"
+
+sql_files = [f for f in os.listdir(folder_path) if f.lower().endswith(".sql")]
+
+print("📘 SQL Files:")
+for file in sql_files:
+    print(file)
+
+
+from pathlib import Path
+
+folder_path = Path(r"C:\Shailendra\TENNECO WORK\Generated_SQL")
+
+files = [str(f) for f in folder_path.glob("*.*")]  # all files
+print("📂 Full file paths:")
+for file in files:
+    print(file)
+
+
+
+
+import pandas as pd
+from pathlib import Path
+
+folder_path = Path(r"C:\Shailendra\TENNECO WORK\Generated_SQL")
+
+file_list = [f.name for f in folder_path.glob("*.*")]
+df = pd.DataFrame(file_list, columns=["FileName"])
+df.to_csv(r"C:\Shailendra\TENNECO WORK\file_list.csv", index=False)
+
+print("✅ File list saved to file_list.csv")
