@@ -1,0 +1,17 @@
+INSERT INTO ADRC (
+    MANDT, ADDRNUMBER, DATE_FROM, DATE_TO, NAME1, NAME2,
+    CITY1, POST_CODE1, STREET, COUNTRY, REGION,
+    TEL_NUMBER, FAX_NUMBER, E_MAIL
+)
+VALUES
+('100', '0000000001', '2020-01-01', '9999-12-31', 'Tenneco Clean Air HQ', 'Finance Dept',
+ 'Plano', '75024', 'Legacy Dr 1000', 'US', 'TX', '+1-214-555-0101', '+1-214-555-0102', 'finance@tenneco.com'),
+
+('100', '0000000002', '2020-01-01', '9999-12-31', 'GE Vernova Corp', 'Energy Systems',
+ 'Boston', '02110', 'Summer Street 200', 'US', 'MA', '+1-617-555-2001', NULL, 'support@gevernova.com'),
+
+('100', '0000000003', '2020-01-01', '9999-12-31', 'CVS Health Analytics', 'PBM Division',
+ 'Providence', '02903', 'Capital Blvd 50', 'US', 'RI', '+1-401-555-0500', NULL, 'analytics@cvshealth.com'),
+
+('100', '0000000004', '2021-07-01', '9999-12-31', 'Genpact Digital', 'Data Engineering',
+ 'Richardson', '75082', 'Campbell Road 300', 'US', 'TX', '+1-972-555-3000', NULL, 'dataeng@genpact.com');
