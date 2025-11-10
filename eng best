@@ -1,3 +1,19 @@
+Hi Team,
+
+While working on the AWS pipeline framework, I’ve identified the following limitations:
+	1.	Terraform – Redshift DDL:
+    Not working for Dev and QA environments.
+    Workaround: Create the objects manually.
+	2.	S3 Bucket – Glue Code:
+    Need to manually create the S3 bucket/folder and copy the Glue code.
+	3.	S3 Bucket – Raw Data:
+    The raw data bucket needs to be created manually.
+	4.	S3 Bucket – Curated Data:
+    The curated data bucket also needs to be created manually.
+
+Please add any additional findings or limitations to this list so we can handle them efficiently and streamline the framework setup.
+
+
 I’m using the same code that was deployed in Dev, QA, and Prod for BSEG. However, I couldn’t find the correction in the Git code, so I’m not sure how it’s been working across all environments. 
 
 
