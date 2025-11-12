@@ -1,3 +1,11 @@
+Just to clarify — based on our recent discussion, 
+I learned that hardcoding was implemented in the audit table for both Dev and Prod 
+environments due to an urgent requirement.
+The Sandeep team has fixed this issue yesterday and merged the changes into Git. 
+
+
+
+
 As our discussion continues, I’d like to emphasize that my primary objective is to ensure this project is delivered successfully, on time, and without any customer escalations. My intent is to maintain transparency, foster collaboration, and address potential issues proactively so we can achieve a smooth delivery. ✅
 
 ⸻
