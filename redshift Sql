@@ -1,3 +1,59 @@
+CREATE OR REPLACE PROCEDURE admin.sp_refresh_row_counts(
+    p_schema IN VARCHAR,
+    p_processed_files IN VARCHAR DEFAULT NULL
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    r_table   RECORD;
+    v_sql     TEXT;
+    v_cnt     BIGINT;
+BEGIN
+    -- Remove old records for this schema
+    DELETE FROM admin.table_row_counts
+    WHERE schema_name = p_schema;
+
+    FOR r_table IN
+        SELECT DISTINCT tablename
+        FROM pg_table_def
+        WHERE schemaname = p_schema
+          AND tablename IS NOT NULL
+    LOOP
+        -- Build dynamic SELECT COUNT(*)
+        v_sql := 'SELECT COUNT(*) FROM '
+                 || quote_ident(p_schema) || '.'
+                 || quote_ident(r_table.tablename);
+
+        EXECUTE v_sql INTO v_cnt;
+
+        -- Insert into audit table
+        INSERT INTO admin.table_row_counts(
+            schema_name,
+            table_name,
+            row_count,
+            processed_files
+        )
+        VALUES (
+            p_schema,
+            r_table.tablename,
+            v_cnt,
+            p_processed_files
+        );
+
+        -- Logging
+        RAISE INFO
+        'Schema: %, Table: %, Rows: %, Files: %',
+        p_schema,
+        r_table.tablename,
+        v_cnt,
+        p_processed_files;
+    END LOOP;
+END;
+$$;
+
+
+
+
 CREATE SCHEMA IF NOT EXISTS admin;
 
 CREATE TABLE IF NOT EXISTS admin.table_row_counts (
