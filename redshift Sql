@@ -1,4 +1,75 @@
 CREATE OR REPLACE PROCEDURE admin.sp_refresh_row_counts(
+    p_schema       IN VARCHAR,
+    p_file_column  IN VARCHAR DEFAULT 'source_file_name'  -- change if needed
+)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    r_table          RECORD;
+    v_sql_count      TEXT;
+    v_sql_files      TEXT;
+    v_cnt            BIGINT;
+    v_processed_files VARCHAR(65535);
+BEGIN
+    -- Remove previous entries for this schema
+    DELETE FROM admin.table_row_counts
+    WHERE schema_name = p_schema;
+
+    -- Loop through all tables in the schema
+    FOR r_table IN
+        SELECT DISTINCT tablename
+        FROM pg_table_def
+        WHERE schemaname = p_schema
+          AND tablename IS NOT NULL
+    LOOP
+        -- 1) Exact row count
+        v_sql_count := 'SELECT COUNT(*) FROM '
+                       || quote_ident(p_schema) || '.'
+                       || quote_ident(r_table.tablename);
+
+        EXECUTE v_sql_count INTO v_cnt;
+
+        -- 2) Comma-separated list of processed files from p_file_column
+        --    Assumes each table has column p_file_column (e.g. source_file_name)
+        v_sql_files := 'SELECT LISTAGG(DISTINCT ' || quote_ident(p_file_column) ||
+                       ', '','') WITHIN GROUP (ORDER BY ' || quote_ident(p_file_column) || ') ' ||
+                       'FROM ' || quote_ident(p_schema) || '.' || quote_ident(r_table.tablename) ||
+                       ' WHERE ' || quote_ident(p_file_column) || ' IS NOT NULL';
+
+        BEGIN
+            EXECUTE v_sql_files INTO v_processed_files;
+        EXCEPTION
+            WHEN OTHERS THEN
+                -- If the column does not exist or LISTAGG fails, keep it NULL
+                v_processed_files := NULL;
+        END;
+
+        -- 3) Insert into audit table
+        INSERT INTO admin.table_row_counts (
+            schema_name,
+            table_name,
+            row_count,
+            as_of_ts,
+            processed_files
+        )
+        VALUES (
+            p_schema,
+            r_table.tablename,
+            v_cnt,
+            GETDATE(),
+            v_processed_files
+        );
+
+        -- 4) Log info
+        RAISE INFO
+            'Schema %, Table %: % rows, processed_files = %',
+            p_schema, r_table.tablename, v_cnt, v_processed_files;
+    END LOOP;
+END;
+$$;
+
+
+CREATE OR REPLACE PROCEDURE admin.sp_refresh_row_counts(
     p_schema IN VARCHAR,
     p_processed_files IN VARCHAR DEFAULT NULL
 )
