@@ -1,0 +1,37 @@
+CREATE OR REPLACE PROCEDURE admin.sp_refresh_row_counts(p_schema IN VARCHAR)
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    r_table   RECORD;
+    v_sql     TEXT;
+    v_cnt     BIGINT;
+BEGIN
+    -- Clear previous counts for this schema
+    DELETE FROM admin.table_row_counts
+    WHERE schema_name = p_schema;
+
+    -- Loop over all base tables in the given schema
+    FOR r_table IN
+        SELECT DISTINCT tablename
+        FROM pg_table_def
+        WHERE schemaname = p_schema
+          AND tablename IS NOT NULL
+    LOOP
+        -- Build dynamic COUNT(*) SQL
+        v_sql := 'SELECT COUNT(*) FROM '
+                 || quote_ident(p_schema) || '.'
+                 || quote_ident(r_table.tablename);
+
+        -- Execute and capture count
+        EXECUTE v_sql INTO v_cnt;
+
+        -- Store in audit table
+        INSERT INTO admin.table_row_counts(schema_name, table_name, row_count)
+        VALUES (p_schema, r_table.tablename, v_cnt);
+
+        -- Log to client
+        RAISE INFO 'Schema %. Table %: % rows',
+                   p_schema, r_table.tablename, v_cnt;
+    END LOOP;
+END;
+$$;
