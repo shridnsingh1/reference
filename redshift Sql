@@ -1,3 +1,23 @@
+-- 2) Processed files (list + count)
+v_sql_files := 'SELECT LISTAGG(DISTINCT ' || quote_ident(p_file_column) ||
+                ', '','') WITHIN GROUP (ORDER BY ' || quote_ident(p_file_column) || ') ' ||
+                'FROM ' || quote_ident(p_schema) || '.' || quote_ident(r_table.tablename) ||
+                ' WHERE ' || quote_ident(p_file_column) || ' IS NOT NULL';
+
+v_sql_files_cnt := 'SELECT COUNT(DISTINCT ' || quote_ident(p_file_column) ||
+                   ') FROM ' || quote_ident(p_schema) || '.' || quote_ident(r_table.tablename) ||
+                   ' WHERE ' || quote_ident(p_file_column) || ' IS NOT NULL';
+
+BEGIN
+    EXECUTE v_sql_files INTO v_processed_files;
+    EXECUTE v_sql_files_cnt INTO v_processed_files_count;
+EXCEPTION
+    WHEN OTHERS THEN
+        v_processed_files := NULL;
+        v_processed_files_count := NULL;
+END;
+
+
 CREATE OR REPLACE PROCEDURE admin.sp_refresh_row_counts(
     p_schema       IN VARCHAR,
     p_file_column  IN VARCHAR DEFAULT 'source_file_name'  -- change if needed
