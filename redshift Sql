@@ -1,3 +1,12 @@
+CREATE SCHEMA IF NOT EXISTS admin;
+
+CREATE TABLE IF NOT EXISTS admin.table_row_counts (
+    schema_name  VARCHAR(128),
+    table_name   VARCHAR(128),
+    row_count    BIGINT,
+    as_of_ts     TIMESTAMP DEFAULT GETDATE()
+);
+
 CREATE OR REPLACE PROCEDURE admin.sp_refresh_row_counts(p_schema IN VARCHAR)
 LANGUAGE plpgsql
 AS $$
