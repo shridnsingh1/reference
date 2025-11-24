@@ -1,3 +1,42 @@
+Strengths (Core Skills, Knowledge Areas, and (CI)² Attributes)
+	1.	Strong Technical Expertise
+      •   Deep experience in data engineering, ETL/ELT design, PySpark, SQL, AWS/GCP/Databricks, and SAP-to-cloud data pipelines.
+      •   Ability to build scalable, reliable, and performance-optimized pipelines across Bronze–Silver–Gold layers.
+	2.	Problem-Solving & Analytical Skills
+      •   Quickly diagnose production issues and resolve bottlenecks.
+      •   Strong debugging skills for complex data flows, schema drifts, and performance tuning.
+	3.	Ownership & Accountability ((CI)² Attributes)
+      •   Takes full responsibility for deliverables, timelines, and quality.
+      •   Actively follows through on commitments and ensures closure without escalations.
+	4.	Customer-Centric Mindset
+      •   Maintains transparent communication with clients and proactively clarifies requirements.
+      •   Focuses on delivering stable, business-ready data for reporting and analytics.
+	5.	Collaboration & Teamwork
+      •   Works effectively with SAP, QA, business, and cross-functional teams.
+      •   Supports peers with technical guidance, code reviews, and knowledge sharing.
+	6.	Adaptability & Continuous Learning
+      •   Quickly learns new tools, cloud services, and project technologies.
+      •   Adapts to changing priorities and project needs while maintaining delivery quality.
+	7.	Process-Oriented Working Style
+      •   Follows structured development processes, coding standards, and documentation practices.
+      •   Ensures audit-readiness, logging, and compliance across pipelines.
+	8.	Communication & Professionalism
+      •   Clear and concise in explaining technical topics to non-technical stakeholders.
+      •   Maintains professionalism in interactions and aligns well with organizational values.
+
+⸻
+
+If you’d like, I can refine this even further based on:
+✔ Your SAP PT/BSEG project work
+✔ Redshift/Glue experience
+✔ Client appreciation notes
+✔ Leadership contributions
+
+
+
+
+
+
 What Could Be Done Differently (Areas That Needed More Focus)
 	1.	Improve automation coverage for monitoring, exception handling, and data quality checks to reduce manual interventions during peak loads.
 	2.	Strengthen early requirement alignment with business and SAP teams to minimize rework in later phases and ensure complete mapping clarity upfront.
