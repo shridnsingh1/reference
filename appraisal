@@ -1,3 +1,24 @@
+Development Areas (Immediate and Long-Term)
+
+Immediate (Short-Term Development)
+	1.	Enhance advanced automation for monitoring, data quality rules, schema drift handling, and alerting to further reduce operational overhead.
+	2.	Strengthen performance tuning skills for high-volume SAP tables and complex transformation workloads to improve end-to-end throughput.
+	3.	Increase focus on early requirement refinement, ensuring all business rules, SAP joins, and mapping logic are fully clarified before development.
+	4.	Improve documentation cadence, updating design docs, test cases, and runbooks consistently during development.
+	5.	Expand test coverage for delta logic, late-arriving records, and edge-case scenarios to reduce SIT/UAT rework.
+
+Long-Term Development
+	1.	Advance architectural skills for designing reusable ingestion frameworks, standardized Silver/Gold patterns, and scalable data models across LOBs.
+	2.	Deepen expertise in modern cloud platforms (Databricks DLT, Unity Catalog, Snowflake, AWS Lake Formation, Redshift Serverless) to support future cloud transformations.
+	3.	Focus on cost optimization strategies to balance performance with cloud budget efficiency across pipelines and workloads.
+	4.	Build leadership capabilities by mentoring junior engineers, conducting technical reviews, and contributing to architectural decision-making.
+	5.	Develop cross-functional business understanding (finance, supply chain, SAP modules) to align data engineering outputs more closely with business value.
+	6.	Prepare for future lead/architect roles by strengthening design governance, stakeholder management, and long-term solution planning.
+
+
+
+
+
 Strengths (Core Skills, Knowledge Areas, and (CI)² Attributes)
 	1.	Strong Technical Expertise
       •   Deep experience in data engineering, ETL/ELT design, PySpark, SQL, AWS/GCP/Databricks, and SAP-to-cloud data pipelines.
