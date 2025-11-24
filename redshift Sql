@@ -1,3 +1,13 @@
+SELECT
+    n.nspname AS schema_name,
+    p.proname AS procedure_name
+FROM pg_proc_info p
+JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE p.prokind = 'p'
+  AND p.proname ILIKE '%bkpf%';
+
+
+
 -- 2) Processed files (list + count)
 v_sql_files := 'SELECT LISTAGG(DISTINCT ' || quote_ident(p_file_column) ||
                 ', '','') WITHIN GROUP (ORDER BY ' || quote_ident(p_file_column) || ') ' ||
