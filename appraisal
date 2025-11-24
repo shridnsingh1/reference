@@ -1,0 +1,27 @@
+Overall Performance, G-Code of Conduct, Values & Integrity
+
+Throughout the appraisal year, I consistently demonstrated strong ownership, accountability, and professionalism in all assigned responsibilities. I adhered to the G Code of Conduct by maintaining transparency, following compliance and security guidelines, and ensuring data confidentiality while working across multiple environments and client systems. I displayed G Values by collaborating effectively with cross-functional teams, supporting colleagues during critical issues, and maintaining a positive and solution-oriented approach in all interactions.
+
+I acted with integrity and fairness in my daily work—whether addressing defects, validating data, or engaging with stakeholders. I ensured accurate communication, timely updates, and responsible decision-making. My behavior and work ethic reflected respect, teamwork, continuous learning, and customer-centricity, contributing to a reliable and trust-based working environment.
+
+⸻
+
+✅ Key Achievements in the Appraisal Year
+	1.	Delivered multiple complex data pipelines across SAP → Cloud workflows (AWS/Databricks/Redshift), covering Bronze, Silver, and Gold layers with high accuracy and performance.
+	2.	Implemented automation and optimization in ETL/ELT processes—improving pipeline reliability, reducing manual effort, and achieving significant runtime improvements.
+	3.	Handled critical production issues proactively, ensuring zero major customer escalations and restoring service stability efficiently.
+	4.	Led data validation and reconciliation activities for large SAP tables (e.g., BKPF, BSEG, BSID, BSAD), improving data quality and enabling accurate business reporting.
+	5.	Streamlined development processes by creating reusable design patterns, coding standards, and documentation for pipeline logic, data mappings, and operational runbooks.
+	6.	Collaborated closely with clients, QA, SAP, and cross-functional teams, ensuring smooth delivery, timely UAT sign-offs, and alignment on business requirements.
+	7.	Mentored team members on PySpark, SQL, Git, and cloud best practices, contributing to overall team capability and project velocity.
+	8.	Demonstrated strong problem-solving and debugging skills, especially in performance tuning, schema handling, file processing, and incremental loads.
+	9.	Ensured consistent adherence to data governance, compliance, and security standards, safeguarding client environments and ensuring audit readiness.
+
+⸻
+
+If you’d like, share your exact project details, and I’ll tailor this further to:
+✔ SAP LOB PT 58 tables
+✔ BSEG full-load activities
+✔ Redshift/Glue job tuning
+✔ Preprod/Prod sign-offs
+✔ Any specific achievements you want highlighted
