@@ -1,3 +1,29 @@
+What Could Be Done Differently (Areas That Needed More Focus)
+	1.	Improve automation coverage for monitoring, exception handling, and data quality checks to reduce manual interventions during peak loads.
+	2.	Strengthen early requirement alignment with business and SAP teams to minimize rework in later phases and ensure complete mapping clarity upfront.
+	3.	Increase focus on documentation during development, ensuring design notes, data dictionaries, and runbooks are updated in parallel with coding for smoother handovers.
+	4.	Enhance time allocation for performance tuning, particularly for large SAP tables with high volumes, to proactively avoid timeout or throughput issues.
+	5.	Expand testing depth in SIT by including more edge-case scenarios for delta loads, schema drift, and late-arriving data.
+	6.	Increase cross-team collaboration to proactively understand dependencies and upstream/downstream impacts before releases.
+	7.	Dedicate more time to learning new cloud capabilities (Databricks DLT, Snowflake features, AWS cost optimization) that can further improve pipeline efficiency.
+	8.	Improve internal knowledge-sharing cadence, including short technical walkthroughs and reusable code patterns for the team.
+
+⸻
+
+If you want, I can tailor these specifically to your year’s activities, such as:
+✔ BSEG full-load challenges
+✔ SAP PT 58 tables onboarding
+✔ TA2 file timeout issues
+✔ Glue/Redshift performance improvements
+✔ Delta vs Full load cycle learning
+
+
+
+
+
+
+
+
 Overall Performance, G-Code of Conduct, Values & Integrity
 
 Throughout the appraisal year, I consistently demonstrated strong ownership, accountability, and professionalism in all assigned responsibilities. I adhered to the G Code of Conduct by maintaining transparency, following compliance and security guidelines, and ensuring data confidentiality while working across multiple environments and client systems. I displayed G Values by collaborating effectively with cross-functional teams, supporting colleagues during critical issues, and maintaining a positive and solution-oriented approach in all interactions.
