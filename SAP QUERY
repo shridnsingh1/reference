@@ -1,0 +1,100 @@
+SELECT
+    b.mandt,
+    b.bukrs,
+    b.kunnr,
+    b.gjahr,
+    b.belnr,
+    b.buzei,
+
+    /* Payment Term */
+    b.zterm,
+    t.ztagg,          -- baseline / net days (config dependent)
+    t.zbd1t,          -- cash discount 1 days
+    t.zbd2t,          -- cash discount 2 days
+    u.text1 AS payment_term_text,
+
+    /* Dates */
+    b.zfbdt AS baseline_date,
+    b.faedt AS due_date,
+    b.augdt AS clearing_date,
+
+    /* Amounts */
+    b.dmbtr AS amount_local,
+
+    /* SD Billing Link */
+    b.vbeln AS billing_doc,
+    v.fkart AS billing_type,
+    v.vkorg AS sales_org,
+    v.kunrg AS payer,
+    v.fkdat AS billing_date,
+    v.waerk AS billing_currency
+
+FROM bsad b
+
+/* Payment Terms Customizing */
+LEFT JOIN t052 t
+  ON t.mandt = b.mandt
+ AND t.zterm = b.zterm
+
+/* Payment Term Texts */
+LEFT JOIN t052u u
+  ON u.mandt = b.mandt
+ AND u.zterm = b.zterm
+ AND u.spras = 'E'          -- English text
+
+/* Billing Header Join */
+LEFT JOIN vbrk v
+  ON v.mandt = b.mandt
+ AND v.vbeln = b.vbeln      -- KEY JOIN (FI → SD)
+
+WHERE b.mandt = '100';
+
+
+BSAD → VBRK
+   •   BSAD.VBELN contains the originating billing document for AR items posted from SD.
+   •   If your FI postings come from SD billing, this will always match VBRK.VBELN.
+
+(If VBELN is empty → it is NOT an SD invoice.)
+
+⸻
+
+2. BSAD → T052 (Payment Terms)
+   •   Direct join on the payment term key:
+
+
+BSAD → T052U (Text)
+
+This adds readable description like “Net 30 Days”, “14 Days 2% Discount”, etc.
+
+
+
+Field
+Source
+Purpose
+ZTERM
+BSAD
+Payment term
+TEXT1
+T052U
+Payment term description
+ZFBDT
+BSAD
+Baseline date
+FAEDT
+BSAD
+Net due date
+AUGDT
+BSAD
+Clearing date (actual paid date)
+FKART
+VBRK
+Billing type (e.g., F2 Invoice)
+FKDAT
+VBRK
+Billing date
+VKORG
+VBRK
+Sales Org
+KUNRG
+VBRK
+Payer
